@@ -1,0 +1,74 @@
+<html>
+  <head>
+    <title>测试wave</title>
+  </head>
+  <body>
+    <ul>
+      <input id="url_input" value="http://127.0.0.1:8080/demo/audio/file/test.mp3" />
+    </ul>
+    <ul>
+      <span>播放进度：</span><progress id="audio_progress" max="0" value="0" ></progress><span id="duration"></span>
+    </ul>
+    <ul>
+      <span>音量:</span><input id="volume_input" /><button id="volume_button">设置</button>
+    </ul>
+    <ul>
+      <button id="play_button">播放</button><button id="pause_button" disabled>暂停</button>
+    </ul>
+    <ul>
+      <div id="root" style="white-space: pre-line; border: 1px solid; width: 100%; height: 400px;"></div>
+    </ul>
+    
+    <script src="../../dist/webcodec-player.js"></script>
+    <script>
+      const player = new WebcodecAudioPlayer();
+      const url_input = document.getElementById("url_input");
+      const audio_progress = document.getElementById("audio_progress");
+      const duration = document.getElementById("duration");
+      const volume_input = document.getElementById("volume_input");
+      const volume_button = document.getElementById("volume_button");
+      const play_button = document.getElementById("play_button");
+      const pause_button = document.getElementById("pause_button");
+
+      const root = document.getElementById("root");
+
+      let progressTimer = 0;
+
+      volume_button.addEventListener("click", () => {
+        player.volume = Number(volume_input.value);
+      })
+
+      play_button.addEventListener("click", () => {
+        audio_progress.max = 0;
+        audio_progress.value = 0;
+        fetch(url_input.value).then((res) => {
+          res.arrayBuffer().then((buffer) => {
+            player.play(buffer).then(() => {
+              root.innerHTML += "播放成功\r\n";
+              audio_progress.max = player.duration;
+              duration.innerHTML = player.duration.toFixed(2);
+              pause_button.removeAttribute("disabled");
+              progressTimer = setInterval(() => {
+                audio_progress.value = player.currentTime;
+              }, 100);
+            }).catch((err) => {
+              root.innerHTML += `播放失败:${err.message}\r\n`;
+            })
+          }).catch((err) => {
+            root.innerHTML += `请求资源失败:${err.message}\r\n`;
+          })
+        }).catch((err) => {
+          root.innerHTML += `请求资源失败:${err.message}\r\n`;
+        })
+      })
+
+      pause_button.addEventListener("click", () => {
+        if (player.paused) {
+          player.resume();
+        } else {
+          player.pause();
+        }
+      })
+    </script>
+  </body>
+</html>

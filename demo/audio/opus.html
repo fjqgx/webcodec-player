@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <title>测试AAC-ADTS</title>
+  </head>
+  <body>
+    <button id="play_button">play</button>
+    <div id="root" style="white-space: pre-line;"></div>
+    <script src="../../dist/webcodec-player.js"></script>
+    <script>
+      let player = new WebcodecAudioPlayer();
+      let local_audio = document.getElementById("local_audio");
+      let play_button = document.getElementById("play_button");
+      play_button.addEventListener("click", () => {
+        fetch("http://127.0.0.1:8080/demo/audio/file/test.opus").then((res) => {
+          res.arrayBuffer().then((buffer) => {
+            player.play(buffer, local_audio).then(() => {
+              player.appendBuffer(buffer);
+              console.log("play suc");
+            }).catch((err) => {
+              console.log("play fail");
+            })
+          }).catch((err) => {
+            console.log("abc", err);
+          })
+        }).catch((err) => {
+          console.log("err", err)
+        })
+      })
+      
+
+      // local_audio.src = "http://127.0.0.1:8080/demo/audio/file/test.wav";
+    </script>
+  </body>
+</html>
